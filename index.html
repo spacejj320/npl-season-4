@@ -329,14 +329,43 @@ main {
     justify-content: center;
     top: 40px;
 }
+input {
+    width: 370px;
+    margin: 0 50px;
+    background: #000;
+    color: #fff;
+    font-size: 40px;
+}
+
+.gbh {
+    position: absolute;
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+   bottom: 60px;
+    left: 190px;
+}
 
 </style>
 <body>
     <section class="brand">
         <img src="https://spacejj320.github.io/npl-season-4/npl.png" alt="" style="    height: auto;
-        width: 757px;">
+        width: 557px;">
 
     
+    </section>
+    <section>
+        <div class="gbh">
+       
+   <div style="display: flex;justify-content: center;">
+    <input type="text" id="team1" placeholder="Enter Team 1 Name"><br><br>
+  
+    <input type="text" id="team2" placeholder="Enter Team 2 Name"><br><br>
+   </div>
+    <button onclick="saveTeamNames()">V/s</button>
+    </div>
     </section>
     <main>
         <div class="marquee" hidden>
@@ -373,6 +402,21 @@ main {
     </aside>
     <script>
         
+    </script>
+    <script>
+        function saveTeamNames() {
+    const team1 = document.getElementById('team1').value;
+    const team2 = document.getElementById('team2').value;
+
+    if (team1.length > 0 && team2.length > 0) {
+        localStorage.setItem('team1', team1);
+        localStorage.setItem('team2', team2);
+        alert('Team names saved successfully!');
+    } else {
+        alert('Please enter both team names.');
+    }
+}
+
     </script>
     
     <script id="serialized-team-map" type="application/json">
