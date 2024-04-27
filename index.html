@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    :root {
+    --color-score: 255 255 255;
+    --color-team-blue: 52 152 219;
+    --color-team-red: 231 76 60;
+}
+
+@keyframes marquee {
+    0% {
+        text-shadow: 0 0 0 rgb(255 255 255 / 0), 0 0 0 rgb(255 255 255 / 0);
+        transform: translate(0, -100%) rotate(5deg);
+    }
+
+    25% {
+        text-shadow: 0 0.1em 0 rgb(var(--color-score) / 0.75), 0 0.2em 0 rgb(var(--color-score) / 0.5);
+        transform: translate(0, 100%) rotate(-5deg);
+    }
+
+    50% {
+        text-shadow: 0 -0.1em 0 rgb(var(--color-score) / 0.75), 0 -0.2em 0 rgb(var(--color-score) / 0.5);
+        transform: translate(0, 0) rotate(5deg);
+    }
+
+    75% {
+        text-shadow: 0 0.1em 0 rgb(var(--color-score) / 0.75), 0 0.2em 0 rgb(var(--color-score) / 0.5);
+        transform: translate(0, 100%) rotate(-5deg);
+    }
+
+    100% {
+        text-shadow: 0 0 0 rgb(255 255 255 / 0), 0 0 0 rgb(255 255 255 / 0);
+        transform: translate(0, -100%) rotate(5deg);
+    }
+}
+
+@keyframes increment {
+    0% {
+        transform: scale3d(1, 1, 1);
+    }
+
+    10%,
+    20% { /* 150ms */
+        transform: scale3d(0.9, 0.9, 0.9) rotate3d(0, 0, 1, -3deg);
+    }
+
+    30%, /* 225ms */
+    50%,
+    70%,
+    90% {
+        transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg);
+    }
+
+    40%,
+    60%,
+    80% {
+        transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg);
+    }
+
+    100% { /* 750ms */
+        transform: scale3d(1, 1, 1);
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-grow: 1;
+    margin: 0;
+}
+
+html {
+    background-color: rgb(0 0 0);
+    color: rgb(255 255 255);
+    display: flex;
+    font-family: 'SF Compact Rounded', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    font-size: 100%;
+    min-height: 100%;
+}
+
+main {
+    cursor: default;
+    display: flex;
+    flex-grow: 1;
+}
+
+.idle {
+    cursor: none;
+}
+
+.marquee {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    gap: min(0.2vw, 0.4vh);
+    font-size: min(10vw, 20vh);
+    font-weight: 500;
+    width: auto;
+    z-index: 200;
+}
+
+.marquee__letter {
+    animation-direction: normal;
+    animation-duration: 3s;
+    animation-fill-mode: both;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in-out;
+    transform: translate(0, -100%) rotate(5deg);
+}
+
+.goal .marquee__letter {
+    animation-name: marquee;
+}
+
+.marquee__letter:nth-child(1)  { animation-delay: 0.0s }
+.marquee__letter:nth-child(2)  { animation-delay: 0.1s }
+.marquee__letter:nth-child(3)  { animation-delay: 0.2s }
+.marquee__letter:nth-child(4)  { animation-delay: 0.3s }
+.marquee__letter:nth-child(5)  { animation-delay: 0.4s }
+.marquee__letter:nth-child(6)  { animation-delay: 0.5s }
+.marquee__letter:nth-child(7)  { animation-delay: 0.6s }
+.marquee__letter:nth-child(8)  { animation-delay: 0.7s }
+.marquee__letter:nth-child(9)  { animation-delay: 0.8s }
+.marquee__letter:nth-child(10) { animation-delay: 0.9s }
+
+.points {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.points::before,
+.points::after {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-size: 450px 144px;
+    content: '';
+    opacity: 0;
+    transition-delay: 150ms;
+    transition-duration: 50ms;
+    transition-property: opacity;
+    width: auto;
+    height: auto;
+    z-index: 100;
+}
+
+.points::before {
+    right: 50%;
+    left: 0;
+    background-color: rgb(var(--color-team-blue));
+    box-shadow: 0 0 32px rgb(var(--color-team-blue) / 0.2), 0 0 96px rgb(var(--color-team-blue) / 0.2);
+}
+
+.points::after {
+    right: 0;
+    left: 50%;
+    background-color: rgb(var(--color-team-red));
+    box-shadow: 0 0 32px rgb(var(--color-team-red) / 0.2), 0 0 96px rgb(var(--color-team-red) / 0.2);
+}
+
+.points__team,
+.points__versus {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-basis: 0;
+}
+
+.points__team {
+    position: relative;
+    animation-delay: 0;
+    animation-direction: normal;
+    animation-duration: 750ms;
+    animation-fill-mode: both;
+    animation-iteration-count: 1;
+    animation-timing-function: linear;
+    flex-grow: 1;
+    font-size: min(40vw, 60vh);
+    padding-inline: 5vw;
+    text-shadow: 0 0 32px rgb(0 0 0), 0 0 96px rgb(0 0 0);
+    transition-delay: 150ms;
+    transition-duration: 50ms;
+    transition-property: color, text-shadow;
+    z-index: 300;
+}
+
+.points__team:first-child {
+    justify-content: flex-end;
+    transform-origin: center right;
+}
+
+.points__team:last-child {
+    justify-content: flex-start;
+    transform-origin: center left;
+}
+
+.points__versus {
+    color: rgb(255 255 255 / 0.8);
+    font-size: min(10vw, 20vh);
+    font-weight: 100;
+    z-index: 400;
+}
+
+.goal--blue {
+    --color-score: var(--color-team-blue);
+}
+
+.goal--red {
+    --color-score: var(--color-team-red);
+}
+
+.points__team--blue {
+    color: rgb(var(--color-team-blue));
+}
+
+.points__team--red {
+    color: rgb(var(--color-team-red));
+}
+
+.goal--blue .points__team--blue,
+.goal--red .points__team--red {
+    animation-name: increment;
+}
+
+.win--blue .points::before {
+    opacity: 1;
+}
+
+.win--blue .points__team--blue {
+    color: rgb(255 255 255);
+    text-shadow: 0 0 32px rgb(255 255 255 / 0.2), 0 0 96px rgb(255 255 255 / 0.2);
+}
+
+.win--red .points::after {
+    opacity: 1;
+}
+
+.win--red .points__team--red {
+    color: rgb(255 255 255);
+    text-shadow: 0 0 32px rgb(255 255 255 / 0.2), 0 0 96px rgb(255 255 255 / 0.2);
+}
+
+.tools {
+    justify-content: space-around;
+    position: absolute;
+    right: 19%;
+    bottom: 10px;
+    left: 19%;
+    display: flex;
+    gap: 10px;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    width: auto;
+    z-index: 400;
+}
+
+.tools__button {
+    position: relative;
+    background-color: transparent;
+    border: 2px solid;
+    border-radius: 18px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 16px;
+    opacity: 0.75;
+    padding: 0;
+    text-transform: uppercase;
+    transition: opacity 100ms;
+    width: 48px;
+    height: 48px;
+}
+
+.tools__button:active {
+    top: 1px;
+}
+
+.tools__button:disabled {
+    border-style: dotted;
+    color: inherit;
+    cursor: wait;
+    opacity: 0.5;
+}
+
+.tools__button:hover:not(:disabled) {
+    opacity: 1;
+}
+
+.tools__button:nth-child(even) {
+    margin-right: auto;
+}
+
+.tools__button:nth-child(odd) {
+    margin-left: auto;
+}
+
+.tools__button--blue {
+    border-color: rgb(var(--color-team-blue));
+}
+
+.tools__button--blue:hover:not(:disabled) {
+    background-color: rgb(var(--color-team-blue) / 0.5);
+}
+
+.tools__button--red {
+    border-color: rgb(var(--color-team-red));
+}
+
+.tools__button--red:hover:not(:disabled) {
+    background-color: rgb(var(--color-team-red) / 0.5);
+}
+.brand {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    top: 40px;
+}
+
+</style>
+<body>
+    <section class="brand">
+        <img src="/npl.png" alt="" style="    height: auto;
+        width: 757px;">
+    </section>
+    <main>
+        <div class="marquee" hidden>
+            <span class="marquee__letter">G</span>
+            <span class="marquee__letter">o</span>
+            <span class="marquee__letter">o</span>
+            <span class="marquee__letter">o</span>
+            <span class="marquee__letter">a</span>
+            <span class="marquee__letter">a</span>
+            <span class="marquee__letter">a</span>
+            <span class="marquee__letter">l</span>
+            <span class="marquee__letter">l</span>
+            <span class="marquee__letter">l</span>
+        </div>
+        <div class="points">
+            <span class="points__team points__team--blue">0</span>
+            <span class="points__versus">&#215;</span>
+            
+            <span class="points__team points__team--red">0</span>
+        </div>
+    </main>
+    
+    <aside class="tools">
+       <div>
+        <button id="decreaseBlueButton" class="decreaseButton">-</button>
+        <button id="tool-score-blue" title="Blue goal" type="button" class="tools__button tools__button--blue">⚽️</button>
+        <button id="tool-win-blue" title="Blue win" type="button" class="tools__button tools__button--blue">🏆</button>
+       </div>
+       <div>
+        <button id="decreaseRedButton" class="decreaseButton">-</button>
+        <button id="tool-score-red" title="Red goal" type="button" class="tools__button tools__button--red">⚽️</button>
+        <button id="tool-win-red" title="Red win" type="button" class="tools__button tools__button--red">🏆</button>
+       </div>
+    </aside>
+    <script>
+        
+    </script>
+    
+    <script id="serialized-team-map" type="application/json">
+        {
+            "blue": {
+                "name": "blue",
+                "points": 0,
+                "colorAsHex": "#3498DB"
+            },
+            "red": {
+                "name": "red",
+                "points": 0,
+                "colorAsHex": "#E74C3C"
+            }
+        }
+    </script>
+    <script>
+        function $(selectors) {
+    return document.querySelector(selectors)
+}
+
+function $$(selectors) {
+    return Array.from(document.querySelectorAll(selectors))
+}
+
+function getElements(teamList) {
+    const marqueeLetters = $$('.marquee__letter')
+
+    const teams = teamList.reduce((teams, team) => {
+        teams[team.name] = $(`.points__team--${team.name}`)
+        return teams
+    }, {})
+
+    return {
+        marqueeLetters,
+        teams,
+    }
+}
+
+function parseTextContent(element) {
+    return JSON.parse(element.textContent)
+}
+
+class Main {
+    elements = {}
+    messagesConnectionErrors = 0
+    teamList = []
+    teamMap = {}
+    winner = null
+
+    constructor(teamMap) {
+        console.debug('constructor', teamMap)
+
+        this.teamMap = teamMap ?? {}
+        this.teamList = Object.values(this.teamMap)
+        this.elements = getElements(this.teamList)
+
+        this.messages = this.setupMessages()
+    }
+
+    async animate(team) {
+        console.debug('update', team)
+
+        const random = (min, max) => {
+            min = Math.ceil(min)
+            max = Math.floor(max)
+            return Math.floor(Math.random() * (max - min + 1) + min)
+        }
+
+        const shoot = (angle, scalar) => {
+            confetti({
+                particleCount: random(5, 10),
+                angle: random(angle - 5, angle + 5),
+                spread: random(35, 55),
+                startVelocity: random(35, 55),
+                colors: ['#FFFFFF', team.colorAsHex, team.colorAsHex],
+                scalar,
+            })
+        }
+
+        for (let index = 0; index < 9; index++) {
+            setTimeout(shoot, random(0, 200), index * 22.5, random(28, 32) / 10)
+
+            setTimeout(
+                shoot,
+                random(100, 300),
+                index * 22.5,
+                random(18, 22) / 10,
+            )
+        }
+
+        document.documentElement.classList.add('goal', `goal--${team.name}`)
+
+        if (team.points === 10) {
+            document.documentElement.classList.add('win', `win--${team.name}`)
+        }
+
+        setTimeout(() => {
+            this.elements.teams[team.name].textContent = team.points
+        }, 150)
+
+        await new Promise((resolve) => {
+            this.elements.marqueeLetters
+                .at(-1)
+                .addEventListener('animationend', resolve)
+        })
+
+        document.documentElement.classList.remove('goal', `goal--${team.name}`)
+    }
+
+    setupMessages() {
+        console.debug('setupMessages')
+        // const messages = new EventSource('event-stream')
+        const messages = new EventTarget()
+
+        const error = (event) => {
+            console.error('event-stream', event)
+            ++this.messagesConnectionErrors
+
+            messages.removeEventListener('error', error)
+            messages.removeEventListener('team', team)
+            messages.close()
+
+            setTimeout(
+                () => this.setupMessages(),
+                this.messagesConnectionErrors * 3000,
+            )
+        }
+
+        const open = (event) => {
+            console.debug('event-stream', event)
+            this.messagesConnectionErrors = 0
+        }
+
+        const team = (event) => {
+            console.debug('event-stream', event)
+            this.update(JSON.parse(event.data))
+        }
+
+        messages.addEventListener('error', error)
+        messages.addEventListener('open', open)
+        messages.addEventListener('team', team)
+
+        return messages
+    }
+
+    update(team) {
+        console.debug('update', team)
+
+        const incremented = this.teamMap[team.name].points < team.points
+        this.teamMap[team.name].points = team.points
+
+        if (incremented && this.winner !== null) {
+            return
+        } else if (document.documentElement.classList.contains('win')) {
+            this.winner = null
+            document.documentElement.classList.remove('win', 'win--blue', 'win--red')
+        }
+
+        if (incremented) {
+            if (team.points === 10) {
+                this.winner = team
+            }
+
+            this.animate(this.teamMap[team.name])
+        } else {
+            this.elements.teams[team.name].textContent = team.points
+        }
+    }
+}
+
+const main = new Main(parseTextContent($('#serialized-team-map')))
+
+async function tools(action, name) {
+    console.debug('tool', action, name)
+    toolsDisable()
+
+    if (action === 'score') {
+        const points = main.teamMap[name].points + 1
+
+        main.messages.dispatchEvent(new MessageEvent('team', {
+            data: JSON.stringify({
+                name,
+                points
+            })
+        }))
+
+        await new Promise((resolve) => {
+            main.elements.marqueeLetters
+                .at(-1)
+                .addEventListener('animationend', resolve)
+        })
+
+        toolsEnable()
+        return
+    }
+
+    if (action === 'win') {
+        document.documentElement.classList.toggle('win')
+        document.documentElement.classList.toggle(`win--${name}`)
+
+        await new Promise((resolve) => {
+            setTimeout(resolve, 200)
+        })
+
+        toolsEnable()
+        return
+    }
+
+    toolsEnable()
+    console.error(`unknown tool action: ${action}`)
+}
+
+const toolScoreBlue = $('#tool-score-blue')
+const toolWinBlue = $('#tool-win-blue')
+const toolScoreRed = $('#tool-score-red')
+const toolWinRed = $('#tool-win-red')
+
+toolScoreBlue.addEventListener('click', () => tools('score', 'blue'))
+toolWinBlue.addEventListener('click', () => tools('win', 'blue'))
+toolScoreRed.addEventListener('click', () => tools('score', 'red'))
+toolWinRed.addEventListener('click', () => tools('win', 'red'))
+
+function toolsEnable() {
+    toolScoreBlue.disabled = false
+    toolWinBlue.disabled = false
+    toolScoreRed.disabled = false
+    toolWinRed.disabled = false
+}
+
+function toolsDisable() {
+    toolScoreBlue.disabled = true
+    toolWinBlue.disabled = true
+    toolScoreRed.disabled = true
+    toolWinRed.disabled = true
+}
+    </script>
+    <script>
+        // Get references to the elements
+const blueTeamScore = document.querySelector('.points__team--blue');
+const redTeamScore = document.querySelector('.points__team--red');
+const decreaseBlueButton = document.getElementById('decreaseBlueButton');
+const decreaseRedButton = document.getElementById('decreaseRedButton');
+
+// Add event listener to the decrease button for the blue team
+decreaseBlueButton.addEventListener('click', () => {
+    // Get the current blue team score
+    let blueScore = parseInt(blueTeamScore.textContent);
+    
+    // Decrease the blue team score
+    blueScore--;
+    
+    // Update the blue team score on the page
+    blueTeamScore.textContent = blueScore;
+});
+
+// Add event listener to the decrease button for the red team
+decreaseRedButton.addEventListener('click', () => {
+    // Get the current red team score
+    let redScore = parseInt(redTeamScore.textContent);
+    
+    // Decrease the red team score
+    redScore--;
+    
+    // Update the red team score on the page
+    redTeamScore.textContent = redScore;
+});
+
+    </script>
+</body>
+</html>
