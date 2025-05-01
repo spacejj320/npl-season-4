@@ -14,14 +14,14 @@
             padding: 0;
         }
         h1 {
-            color: #FED941; /* Bright yellow for visibility */
+            color: #FED941;
             margin: 20px;
         }
         table {
             width: 90%;
             margin: 20px auto;
             border-collapse: collapse;
-            font-size: 24px; /* Larger font size for visibility */
+            font-size: 24px;
         }
         th, td {
             border: 1px solid #444;
@@ -33,6 +33,8 @@
         }
         td {
             background-color: #222;
+            font-size: 16px;
+            text-align: left;
         }
         input {
             font-size: 20px;
@@ -46,7 +48,7 @@
         button {
             font-size: 7px;
             padding: 10px 20px;
-            background-color: #FED941; /* Bright yellow for contrast */
+            background-color: #FED941;
             color: #0a0a0a;
             border: none;
             cursor: pointer;
@@ -59,45 +61,36 @@
         .main-th th {
             font-size: 16px;
         }
-        td {
-            font-size: 16px;
-            text-align: left;
-        }
-        tbody tr {
-            counter-increment: rowNumber; /* Increment the counter for each row */
-        }
-        tbody tr td:first-child::before {
-            content: counter(rowNumber); /* Display the counter */
-            margin-right: 10px;
+        .pool-label {
             font-weight: bold;
+            background-color: #111;
+            color: #FED941;
+            text-align: left;
+            font-size: 18px;
         }
         tbody tr:nth-child(1) {
-    background-color: #FFD700; /* Gold for the 1st place team */
-    color: #0a0a0a; /* Dark text for better contrast */
-}
-
-tbody tr:nth-child(2) {
-    background-color: #C0C0C0; /* Silver for the 2nd place team */
-    color: #0a0a0a;
-}
-
-tbody tr:nth-child(3) {
-    background-color: #CD7F32; /* Bronze for the 3rd place team */
-    color: #0a0a0a;
-}
-
-tbody tr:nth-child(4) {
-    background-color: #4CAF50; /* Green for the 4th place team */
-    color: #ffffff; /* Keeping white text for contrast */
-}
-
+            background-color: #FFD700;
+            color: #0a0a0a;
+        }
+        tbody tr:nth-child(2) {
+            background-color: #C0C0C0;
+            color: #0a0a0a;
+        }
+        tbody tr:nth-child(3) {
+            background-color: #CD7F32;
+            color: #0a0a0a;
+        }
+        tbody tr:nth-child(4) {
+            background-color: #4CAF50;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
     <h1>NPL Season-4 Score Table</h1>
-   <div style="    display: flex;
-   justify-content: end;
-   margin-right: 61px;"> <button onclick="sortTable()">Sort Table</button></div>
+    <div style="display: flex; justify-content: end; margin-right: 61px;">
+        <button onclick="sortTable()">Sort Table</button>
+    </div>
     <table border="1" id="scoreTable">
         <thead>
             <tr class="main-th">
@@ -111,84 +104,115 @@ tbody tr:nth-child(4) {
                 <th>Save</th>
             </tr>
         </thead>
-        <tbody>
-        </tbody>
+        <tbody></tbody>
     </table>
+
     <script>
-        const teams = [
-            'Brigadiers FC', 'Sanam FC', 'Bakesa FC', 'Faaz FC', 'Khobar FC',
-            'Pedox FC', 'Mastercoat FC', 'Firewing', 'KK Furniture', 'GreekMen FC',
-            'WonderHome FC', 'Loft FC'
-        ];
-    
+        const teams = {
+            'Pool A': ['MNFC', 'Wonder Home FC', 'Loft FC', 'Sanam FC', 'Qatar FC'],
+            'Pool B': ['Mint FC', 'DNFC', 'Sannadhasena', 'Greek Men FC', 'FC Thozhilali']
+        };
+
         function saveTeam(row, name) {
             const matches = parseInt(row.cells[1].children[0].value);
             const won = parseInt(row.cells[2].children[0].value);
             const lost = parseInt(row.cells[3].children[0].value);
             const draw = parseInt(row.cells[4].children[0].value);
             const goalDifference = parseInt(row.cells[5].children[0].value);
-            const points = won * 3 + draw; // Automatically calculate points
-            row.cells[6].children[0].value = points; // Update points field in the row
-    
+            const points = won * 3 + draw;
+            row.cells[6].children[0].value = points;
+
             const teamData = JSON.parse(localStorage.getItem('teams')) || {};
             teamData[name] = { matches, won, lost, draw, goalDifference, points };
             localStorage.setItem('teams', JSON.stringify(teamData));
-            // Removed alert for a cleaner experience
         }
-    
+
         function addEventListenersToRow(row) {
             Array.from(row.getElementsByTagName('input')).forEach(input => {
-                input.addEventListener('keypress', function(event) {
+                input.addEventListener('keypress', function (event) {
                     if (event.key === "Enter") {
-                        event.preventDefault(); // Prevent the default Enter key behavior
-                        saveTeam(row, row.cells[0].textContent); // Save the data when Enter is pressed
+                        event.preventDefault();
+                        saveTeam(row, row.cells[0].textContent);
                     }
                 });
             });
         }
-    
+
         function displayTeams() {
             const storedTeams = JSON.parse(localStorage.getItem('teams')) || {};
             const tbody = document.getElementById('scoreTable').getElementsByTagName('tbody')[0];
             tbody.innerHTML = '';
-            teams.forEach(team => {
-                const data = storedTeams[team] || { matches: 0, won: 0, lost: 0, draw: 0, goalDifference: 0, points: 0 };
-                const row = tbody.insertRow();
-                row.insertCell(0).textContent = team;
-                Object.values(data).forEach((value, index) => {
-                    const input = document.createElement('input');
-                    input.type = 'number';
-                    input.value = value;
-                    row.insertCell(index + 1).appendChild(input);
+
+            for (let pool in teams) {
+                const labelRow = tbody.insertRow();
+                labelRow.classList.add('pool-label-row');
+                const labelCell = labelRow.insertCell(0);
+                labelCell.colSpan = 8;
+                labelCell.className = 'pool-label';
+                labelCell.textContent = pool;
+
+                teams[pool].forEach(team => {
+                    const data = storedTeams[team] || { matches: 0, won: 0, lost: 0, draw: 0, goalDifference: 0, points: 0 };
+                    const row = tbody.insertRow();
+                    row.setAttribute('data-team', team);
+                    row.setAttribute('data-pool', pool);
+                    row.insertCell(0).textContent = team;
+                    Object.values(data).forEach((value, index) => {
+                        const input = document.createElement('input');
+                        input.type = 'number';
+                        input.value = value;
+                        row.insertCell(index + 1).appendChild(input);
+                    });
+                    const saveBtn = document.createElement('button');
+                    saveBtn.textContent = 'Save';
+                    saveBtn.onclick = function () { saveTeam(row, team); };
+                    row.insertCell(7).appendChild(saveBtn);
+                    addEventListenersToRow(row);
                 });
-                const saveBtn = document.createElement('button');
-                saveBtn.textContent = 'Save';
-                saveBtn.onclick = function() { saveTeam(row, team); };
-                row.insertCell(7).appendChild(saveBtn);
-                addEventListenersToRow(row); // Attach Enter key listener
-            });
+            }
         }
-    
+
         function sortTable() {
             const tbody = document.getElementById('scoreTable').getElementsByTagName('tbody')[0];
-            const rows = Array.from(tbody.rows);
-    
-            rows.sort((a, b) => {
-                const pointsA = parseInt(a.cells[6].children[0].value);
-                const goalDifferenceA = parseInt(a.cells[5].children[0].value);
-                const pointsB = parseInt(b.cells[6].children[0].value);
-                const goalDifferenceB = parseInt(b.cells[5].children[0].value);
-                return pointsB - pointsA || goalDifferenceB - goalDifferenceA;
+            const allRows = Array.from(tbody.rows);
+
+            const pools = {};
+            let currentPool = null;
+
+            allRows.forEach(row => {
+                if (row.classList.contains('pool-label-row')) {
+                    currentPool = row.cells[0].textContent.trim();
+                    pools[currentPool] = [];
+                } else if (currentPool) {
+                    pools[currentPool].push(row);
+                }
             });
-    
-            while (tbody.firstChild) {
-                tbody.removeChild(tbody.firstChild);
+
+            tbody.innerHTML = '';
+
+            for (let pool in pools) {
+                const labelRow = document.createElement('tr');
+                labelRow.classList.add('pool-label-row');
+                const labelCell = document.createElement('td');
+                labelCell.colSpan = 8;
+                labelCell.className = 'pool-label';
+                labelCell.textContent = pool;
+                labelRow.appendChild(labelCell);
+                tbody.appendChild(labelRow);
+
+                const sortedRows = pools[pool].sort((a, b) => {
+                    const pointsA = parseInt(a.cells[6].children[0].value);
+                    const gdA = parseInt(a.cells[5].children[0].value);
+                    const pointsB = parseInt(b.cells[6].children[0].value);
+                    const gdB = parseInt(b.cells[5].children[0].value);
+                    return pointsB - pointsA || gdB - gdA;
+                });
+
+                sortedRows.forEach(row => tbody.appendChild(row));
             }
-            rows.forEach(row => tbody.appendChild(row));
         }
-    
+
         window.onload = displayTeams;
     </script>
-    
 </body>
 </html>
