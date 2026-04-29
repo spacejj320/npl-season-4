@@ -73,12 +73,14 @@
 
 body {
     display: flex;
+    flex-direction: column;
     flex-grow: 1;
     margin: 0;
+    min-height: 100vh;
 }
 
 html {
-    background-color: rgb(0 0 0);
+    background-color: #6e0028;
     color: rgb(255 255 255);
     display: flex;
     font-family: 'SF Compact Rounded', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -90,6 +92,7 @@ main {
     cursor: default;
     display: flex;
     flex-grow: 1;
+    padding-bottom: 140px;
 }
 
 .idle {
@@ -142,6 +145,16 @@ main {
     justify-content: center;
 }
 
+.points__side {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 0;
+    z-index: 300;
+}
+
 .points::before,
 .points::after {
     position: absolute;
@@ -189,9 +202,9 @@ main {
     animation-fill-mode: both;
     animation-iteration-count: 1;
     animation-timing-function: linear;
-    flex-grow: 1;
     font-size: min(40vw, 60vh);
     padding-inline: 5vw;
+    line-height: 1;
     text-shadow: 0 0 32px rgb(0 0 0), 0 0 96px rgb(0 0 0);
     transition-delay: 150ms;
     transition-duration: 50ms;
@@ -199,14 +212,31 @@ main {
     z-index: 300;
 }
 
-.points__team:first-child {
-    justify-content: flex-end;
+.points__team--blue {
     transform-origin: center right;
 }
 
-.points__team:last-child {
-    justify-content: flex-start;
+.points__team--red {
     transform-origin: center left;
+}
+
+.points__name {
+    margin-top: 8px;
+    font-size: clamp(20px, 2.5vw, 42px);
+    font-weight: 700;
+    text-align: center;
+    text-shadow: 0 0 20px rgb(0 0 0 / 0.8);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    padding-inline: 12px;
+}
+
+.points__name--blue {
+    color: rgb(var(--color-team-blue));
+}
+
+.points__name--red {
+    color: rgb(var(--color-team-red));
 }
 
 .points__versus {
@@ -255,33 +285,63 @@ main {
     text-shadow: 0 0 32px rgb(255 255 255 / 0.2), 0 0 96px rgb(255 255 255 / 0.2);
 }
 
-.tools {
-    justify-content: space-around;
-    position: absolute;
-    right: 19%;
-    bottom: 10px;
-    left: 19%;
+.controls-footer {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 500;
     display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 16px 14px;
+    background: #6e0028;
+    backdrop-filter: blur(2px);
+    border-top: 1px solid rgb(255 255 255 / 0.15);
+}
+
+.footer-names {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 10px;
+}
+
+.footer-vs {
+    color: rgb(255 255 255 / 0.85);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+.tools {
+    justify-content: center;
+    display: flex;
+    gap: 20px;
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    width: auto;
-    z-index: 400;
+    width: 100%;
+}
+
+.tools__group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .tools__button {
     position: relative;
     background-color: transparent;
     border: 2px solid;
-    border-radius: 18px;
+    border-radius: 12px;
     cursor: pointer;
     font-family: inherit;
-    font-size: 16px;
+    font-size: 15px;
     opacity: 0.75;
     padding: 0;
     text-transform: uppercase;
     transition: opacity 100ms;
-    width: 48px;
-    height: 48px;
+    width: 38px;
+    height: 38px;
 }
 
 .tools__button:active {
@@ -297,14 +357,6 @@ main {
 
 .tools__button:hover:not(:disabled) {
     opacity: 1;
-}
-
-.tools__button:nth-child(even) {
-    margin-right: auto;
-}
-
-.tools__button:nth-child(odd) {
-    margin-left: auto;
 }
 
 .tools__button--blue {
@@ -329,24 +381,42 @@ main {
     justify-content: center;
     top: 40px;
 }
+
+.brand img {
+    width: min(560px, 82vw);
+    height: auto;
+}
 input {
-    width: 370px;
-    margin: 0 50px;
-    background: #000;
+    width: 260px;
+    margin: 0;
+    background: rgb(0 0 0 / 0.9);
     color: #fff;
-    font-size: 40px;
-    border: none;
+    font-size: 18px;
+    border: 1px solid rgb(255 255 255 / 0.2);
+    border-radius: 8px;
+    padding: 8px 10px;
+    height: 38px;
 }
 
-.gbh {
-    position: absolute;
-    z-index: 99999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-   bottom: 60px;
-    left: 190px;
+.footer-save {
+    background: rgb(255 255 255 / 0.1);
+    color: #fff;
+    border: 1px solid rgb(255 255 255 / 0.3);
+    border-radius: 8px;
+    font-size: 13px;
+    height: 38px;
+    padding: 0 14px;
+    cursor: pointer;
+}
+
+.decreaseButton {
+    background-color: transparent;
+    color: #fff;
+    border: 1px solid rgb(255 255 255 / 0.4);
+    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
 }
 
 </style>
@@ -355,21 +425,7 @@ input {
         <a href="/standing.html">Table</a>
     </div>
     <section class="brand">
-        <img src="https://spacejj320.github.io/npl-season-4/npl.png" alt="" style="    height: auto;
-        width: 557px;">
-
-    
-    </section>
-    <section>
-        <div class="gbh">
-       
-   <div style="display: flex;justify-content: center;">
-    <input type="text" id="team1" placeholder="Enter Team 1 Name"><br><br>
-  
-    <input type="text" id="team2" placeholder="Enter Team 2 Name"><br><br>
-   </div>
-    <button onclick="saveTeamNames()">V/s</button>
-    </div>
+        <img src="../NPL-LOGO.png" alt="NPL Logo">
     </section>
     <main>
         <div class="marquee" hidden>
@@ -385,41 +441,82 @@ input {
             <span class="marquee__letter">l</span>
         </div>
         <div class="points">
-            <span class="points__team points__team--blue">0</span>
+            <div class="points__side">
+                <span class="points__team points__team--blue">0</span>
+                <span class="points__name points__name--blue">BLUE</span>
+            </div>
             <span class="points__versus">&#215;</span>
-            
-            <span class="points__team points__team--red">0</span>
+            <div class="points__side">
+                <span class="points__team points__team--red">0</span>
+                <span class="points__name points__name--red">RED</span>
+            </div>
         </div>
     </main>
     
-    <aside class="tools">
-       <div>
-        <button id="decreaseBlueButton" class="decreaseButton">-</button>
-        <button id="tool-score-blue" title="Blue goal" type="button" class="tools__button tools__button--blue">⚽️</button>
-        <button id="tool-win-blue" title="Blue win" type="button" class="tools__button tools__button--blue">🏆</button>
-       </div>
-       <div>
-        <button id="decreaseRedButton" class="decreaseButton">-</button>
-        <button id="tool-score-red" title="Red goal" type="button" class="tools__button tools__button--red">⚽️</button>
-        <button id="tool-win-red" title="Red win" type="button" class="tools__button tools__button--red">🏆</button>
-       </div>
-    </aside>
+    <footer class="controls-footer">
+        <div class="footer-names">
+            <input type="text" id="team1" placeholder="Enter Team 1 Name">
+            <span class="footer-vs">V/S</span>
+            <input type="text" id="team2" placeholder="Enter Team 2 Name">
+            <button class="footer-save" onclick="saveTeamNames()">Save</button>
+        </div>
+        <aside class="tools">
+            <div class="tools__group">
+                <button id="decreaseBlueButton" class="decreaseButton">-</button>
+                <button id="tool-score-blue" title="Blue goal" type="button" class="tools__button tools__button--blue">⚽️</button>
+                <button id="tool-win-blue" title="Blue win" type="button" class="tools__button tools__button--blue">🏆</button>
+            </div>
+            <div class="tools__group">
+                <button id="decreaseRedButton" class="decreaseButton">-</button>
+                <button id="tool-score-red" title="Red goal" type="button" class="tools__button tools__button--red">⚽️</button>
+                <button id="tool-win-red" title="Red win" type="button" class="tools__button tools__button--red">🏆</button>
+            </div>
+        </aside>
+    </footer>
     <script>
         
     </script>
     <script>
-        function saveTeamNames() {
-    const team1 = document.getElementById('team1').value;
-    const team2 = document.getElementById('team2').value;
+        function applyTeamNames(team1, team2) {
+    document.querySelector('.points__name--blue').textContent = team1 || 'BLUE';
+    document.querySelector('.points__name--red').textContent = team2 || 'RED';
+}
+
+function loadSavedTeamNames() {
+    const savedTeam1 = localStorage.getItem('team1') || '';
+    const savedTeam2 = localStorage.getItem('team2') || '';
+    const team1Input = document.getElementById('team1');
+    const team2Input = document.getElementById('team2');
+    team1Input.value = savedTeam1;
+    team2Input.value = savedTeam2;
+    applyTeamNames(savedTeam1, savedTeam2);
+}
+
+function saveTeamNames() {
+    const team1 = document.getElementById('team1').value.trim();
+    const team2 = document.getElementById('team2').value.trim();
 
     if (team1.length > 0 && team2.length > 0) {
         localStorage.setItem('team1', team1);
         localStorage.setItem('team2', team2);
+        applyTeamNames(team1, team2);
         alert('Team names saved successfully!');
     } else {
         alert('Please enter both team names.');
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadSavedTeamNames();
+    document.getElementById('team1').addEventListener('input', (event) => {
+        const team2 = document.getElementById('team2').value.trim();
+        applyTeamNames(event.target.value.trim(), team2);
+    });
+    document.getElementById('team2').addEventListener('input', (event) => {
+        const team1 = document.getElementById('team1').value.trim();
+        applyTeamNames(team1, event.target.value.trim());
+    });
+});
 
     </script>
     

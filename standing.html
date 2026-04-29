@@ -3,54 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Tournament Score Table</title>
+    <title>NPL Season 6 Standings</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #0a0a0a;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #6e0028;
             color: #fff;
             text-align: center;
             margin: 0;
-            padding: 0;
+            padding: 20px 16px 40px;
         }
         h1 {
             color: #FED941;
-            margin: 20px;
+            margin: 8px 0 20px;
+            font-size: clamp(30px, 4vw, 52px);
+            letter-spacing: 0.08em;
         }
         table {
             width: 90%;
             margin: 20px auto;
             border-collapse: collapse;
-            font-size: 24px;
+            font-size: 18px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgb(0 0 0 / 0.45);
         }
         th, td {
-            border: 1px solid #444;
-            padding: 10px 20px;
+            border: 1px solid #383838;
+            padding: 10px 12px;
             color: #fff;
         }
         th {
-            background-color: #333;
+            background: #1f1f1f;
+            position: sticky;
+            top: 0;
+            z-index: 2;
         }
         td {
-            background-color: #222;
+            background-color: #121212;
             font-size: 16px;
             text-align: left;
         }
         input {
-            font-size: 20px;
-            padding: 5px;
-            background-color: #333;
+            font-size: 16px;
+            padding: 8px 6px;
+            background-color: #1d1d1d;
             color: #fff;
-            border: none;
+            border: 1px solid #3c3c3c;
+            border-radius: 6px;
             text-align: center;
             width: 100%;
         }
+        input:focus {
+            outline: none;
+            border-color: #FED941;
+            box-shadow: 0 0 0 2px rgb(254 217 65 / 0.25);
+        }
         button {
-            font-size: 7px;
-            padding: 10px 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            padding: 8px 14px;
             background-color: #FED941;
             color: #0a0a0a;
             border: none;
+            border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s, color 0.3s;
         }
@@ -63,32 +80,29 @@
         }
         .pool-label {
             font-weight: bold;
-            background-color: #111;
+            background: #0d0d0d;
             color: #FED941;
             text-align: left;
             font-size: 18px;
+            letter-spacing: 0.05em;
         }
-        tbody tr:nth-child(1) {
-            background-color: #FFD700;
-            color: #0a0a0a;
+        tbody tr:not(.pool-label-row):hover td {
+            background: #1c1c1c;
         }
-        tbody tr:nth-child(2) {
-            background-color: #C0C0C0;
-            color: #0a0a0a;
+        .toolbar {
+            width: 90%;
+            margin: 0 auto 10px;
+            display: flex;
+            justify-content: flex-end;
         }
-        tbody tr:nth-child(3) {
-            background-color: #CD7F32;
-            color: #0a0a0a;
-        }
-        tbody tr:nth-child(4) {
-            background-color: #4CAF50;
-            color: #ffffff;
+        td:first-child {
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <h1>NPL Season-4 Score Table</h1>
-    <div style="display: flex; justify-content: end; margin-right: 61px;">
+    <h1>NPL SEASON 6</h1>
+    <div class="toolbar">
         <button onclick="sortTable()">Sort Table</button>
     </div>
     <table border="1" id="scoreTable">
@@ -109,9 +123,27 @@
 
     <script>
         const teams = {
-            'Pool A': ['MNFC', 'Wonder Home FC', 'Loft FC', 'Sanam FC', 'Qatar FC'],
-            'Pool B': ['Mint FC', 'DNFC', 'Sannadhasena', 'Greek Men FC', 'FC Thozhilali']
+            'GROUP A': ['SANNADHASENA', 'WONDER HOME FC', 'MINT FC', 'OZO FC'],
+            'GROUP B': ['QATAR FC', 'GREEK MEN FC', 'SANAM FC', 'NKP WARRIORS']
         };
+        const TEAM_ORDER_KEY = 'teamOrderByPool';
+
+        function getTeamOrderByPool() {
+            return JSON.parse(localStorage.getItem(TEAM_ORDER_KEY)) || {};
+        }
+
+        function getPoolTeamsInSavedOrder(poolName) {
+            const savedOrderByPool = getTeamOrderByPool();
+            const defaultTeams = teams[poolName];
+            const savedOrder = savedOrderByPool[poolName];
+
+            if (!Array.isArray(savedOrder) || savedOrder.length !== defaultTeams.length) {
+                return defaultTeams;
+            }
+
+            const hasExactTeams = defaultTeams.every(team => savedOrder.includes(team));
+            return hasExactTeams ? savedOrder : defaultTeams;
+        }
 
         function saveTeam(row, name) {
             const matches = parseInt(row.cells[1].children[0].value);
@@ -128,7 +160,13 @@
         }
 
         function addEventListenersToRow(row) {
-            Array.from(row.getElementsByTagName('input')).forEach(input => {
+            Array.from(row.getElementsByTagName('input')).forEach((input, index) => {
+                // Auto-save on every value edit (except computed points field).
+                if (index !== 5) {
+                    input.addEventListener('input', function () {
+                        saveTeam(row, row.cells[0].textContent);
+                    });
+                }
                 input.addEventListener('keypress', function (event) {
                     if (event.key === "Enter") {
                         event.preventDefault();
@@ -151,7 +189,8 @@
                 labelCell.className = 'pool-label';
                 labelCell.textContent = pool;
 
-                teams[pool].forEach(team => {
+                const poolTeams = getPoolTeamsInSavedOrder(pool);
+                poolTeams.forEach(team => {
                     const data = storedTeams[team] || { matches: 0, won: 0, lost: 0, draw: 0, goalDifference: 0, points: 0 };
                     const row = tbody.insertRow();
                     row.setAttribute('data-team', team);
@@ -161,6 +200,9 @@
                         const input = document.createElement('input');
                         input.type = 'number';
                         input.value = value;
+                        if (index === 5) {
+                            input.readOnly = true;
+                        }
                         row.insertCell(index + 1).appendChild(input);
                     });
                     const saveBtn = document.createElement('button');
@@ -190,6 +232,8 @@
 
             tbody.innerHTML = '';
 
+            const sortedOrderByPool = {};
+
             for (let pool in pools) {
                 const labelRow = document.createElement('tr');
                 labelRow.classList.add('pool-label-row');
@@ -208,8 +252,11 @@
                     return pointsB - pointsA || gdB - gdA;
                 });
 
+                sortedOrderByPool[pool] = sortedRows.map(row => row.getAttribute('data-team'));
                 sortedRows.forEach(row => tbody.appendChild(row));
             }
+
+            localStorage.setItem(TEAM_ORDER_KEY, JSON.stringify(sortedOrderByPool));
         }
 
         window.onload = displayTeams;
